@@ -27,6 +27,7 @@ import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
+import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -39,13 +40,20 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.Cache;
+import com.android.volley.Network;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
+import com.android.volley.toolbox.BasicNetwork;
+import com.android.volley.toolbox.DiskBasedCache;
+import com.android.volley.toolbox.HttpClientStack;
 import com.android.volley.toolbox.HttpHeaderParser;
+import com.android.volley.toolbox.HttpStack;
+import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
@@ -71,6 +79,7 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
@@ -239,13 +248,13 @@ public class MainActivity extends AppCompatActivity
                         mUsername,
                         mPhotoUrl);
 
-                /*
+
                 mFirebaseDatabaseReference.child(MESSAGES_CHILD)
                         .push().setValue(friendlyMessage);
-                     */
+
 
                 try {
-                    RequestQueue requestQueue = Volley.newRequestQueue(this);
+                    RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext(),null);
                     String URL = "https://fcm.googleapis.com/fcm/send";
                     JSONObject jsonBody = new JSONObject();
                     JSONObject data = new JSONObject();
@@ -254,7 +263,7 @@ public class MainActivity extends AppCompatActivity
                     jsonBody.put("data", data);
                     final String mRequestBody = jsonBody.toString();
 
-                    StringRequest stringRequest = new StringRequest(Request.Method.POST, URL, new Response.Listener<String>() {
+                    StringRequest stringRequest = new StringRequest(Request.Method.POST, URL,new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
                             Log.i("VOLLEY", response);
@@ -290,6 +299,14 @@ public class MainActivity extends AppCompatActivity
                             }
                             return Response.success(responseString, HttpHeaderParser.parseCacheHeaders(response));
                         }
+
+                        @Override
+                        public Map<String, String> getHeaders() throws AuthFailureError {
+                            HashMap<String, String> headers = new HashMap<String, String>();
+                            headers.put("Authorization", "key=AIzaSyC6A76qCHfBTVhWDOQmk60zqhvsm2dZkb0");
+                            return headers;
+                        }
+
                     };
 
                     requestQueue.add(stringRequest);
