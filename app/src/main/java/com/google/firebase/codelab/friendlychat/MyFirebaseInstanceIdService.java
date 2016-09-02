@@ -15,6 +15,7 @@
  */
 package com.google.firebase.codelab.friendlychat;
 
+import android.provider.Settings;
 import android.util.Log;
 
 import com.google.firebase.iid.FirebaseInstanceId;
@@ -37,8 +38,9 @@ public class MyFirebaseInstanceIdService extends FirebaseInstanceIdService {
         String token = FirebaseInstanceId.getInstance().getToken();
         Log.d(TAG, "FCM Token: " + token);
 
+        //sendRegistrationtoServer();
         // Once a token is generated, we subscribe to topic.
-        FirebaseMessaging.getInstance()
-                .subscribeToTopic(FRIENDLY_ENGAGE_TOPIC);
+        FirebaseMessaging.getInstance().subscribeToTopic(FRIENDLY_ENGAGE_TOPIC);
+
     }
 }
