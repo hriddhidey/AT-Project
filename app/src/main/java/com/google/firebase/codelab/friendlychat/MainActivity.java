@@ -60,6 +60,7 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -263,14 +264,21 @@ public class MainActivity extends AppCompatActivity
     // Note Snackbar
     public void addNote(View view) {
         TextView textView = (TextView) view;
-        String msg= textView.getText().toString();
+        final String msg= "GoChat Reminder: " + textView.getText().toString();
         Snackbar snackbar = Snackbar
-                .make(relativeLayout, msg, Snackbar.LENGTH_LONG)
-                .setAction("UNDO", new View.OnClickListener() {
+                .make(relativeLayout, "Set Reminder?", Snackbar.LENGTH_LONG)
+                .setAction("YES", new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        Snackbar snackbar1 = Snackbar.make(relativeLayout, "Message is restored!", Snackbar.LENGTH_SHORT);
-                        snackbar1.show();
+                        Calendar cal = Calendar.getInstance();
+                        Intent intent = new Intent(Intent.ACTION_EDIT);
+                        intent.setType("vnd.android.cursor.item/event");
+                        intent.putExtra("beginTime", cal.getTimeInMillis());
+                        intent.putExtra("allDay", true);
+                        intent.putExtra("rrule", "FREQ=YEARLY");
+                        intent.putExtra("endTime", cal.getTimeInMillis()+60*60*1000);
+                        intent.putExtra("title", msg);
+                        startActivity(intent);
                     }
                 });
 
