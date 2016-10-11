@@ -59,7 +59,10 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 
 import org.json.JSONObject;
 
+import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
@@ -70,6 +73,10 @@ public class MainActivity extends AppCompatActivity
         implements GoogleApiClient.OnConnectionFailedListener {
 
     RelativeLayout relativeLayout;
+
+    //FCM Notification constants
+    public final static String AUTH_KEY_FCM = "AIzaSyC6A76qCHfBTVhWDOQmk60zqhvsm2dZkb0";
+    public final static String API_URL_FCM = "https://fcm.googleapis.com/fcm/send";
 
     public static class MessageViewHolder extends RecyclerView.ViewHolder {
         public TextView messageTextView;
@@ -232,9 +239,15 @@ public class MainActivity extends AppCompatActivity
                         mUsername,
                         mPhotoUrl);
 
-
                 mFirebaseDatabaseReference.child(MESSAGES_CHILD)
                         .push().setValue(friendlyMessage);
+
+                try {
+                    pushFCMNotification(String.valueOf(mUsername));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
                 mMessageEditText.setText("");
             }
         });
@@ -426,7 +439,34 @@ public class MainActivity extends AppCompatActivity
         Toast.makeText(this, "Google Play Services error.", Toast.LENGTH_SHORT).show();
     }
 
+    public static void pushFCMNotification(String userDeviceIdKey) throws Exception{
 
+        // userDeviceIdKey is the device id you will query from your database
+        String authKey = AUTH_KEY_FCM;   // You FCM AUTH key
+        String FMCurl = API_URL_FCM;
 
+        URL url = new URL(FMCurl);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+
+        conn.setUseCaches(false);
+        conn.setDoInput(true);
+        conn.setDoOutput(true);
+
+        conn.setRequestMethod("POST");
+        conn.setRequestProperty("Authorization","key="+authKey);
+        conn.setRequestProperty("Content-Type","application/json");
+
+        JSONObject json = new JSONObject();
+        json.put("to",userDeviceIdKey.trim());
+        JSONObject info = new JSONObject();
+        info.put("title", "Notificatoin Title");   // Notification title
+        info.put("body", "Hello Test notification"); // Notification body
+        json.put("notification", info);
+
+        OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
+        wr.write(json.toString());
+        wr.flush();
+        conn.getInputStream();
+    }
 
 }
